@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import generateTokenAndSetCookie from "../utils/generateToken.js";
 import bcryptjs from "bcryptjs"
 
 export const Signup = async (req, res) => {
@@ -37,9 +38,16 @@ export const Signup = async (req, res) => {
             gender,
             profilePic: gender == "male" ? boyProfilePic : girlProfilePic,
         });
+        if (newUser) {
+            //Generate JWT TOken 
+            generateTokenAndSetCookie(newUser._id, res);
+            await newUser.save();
+            res.status(201).json({ message: "User created successfully" });
+        }
+        else {
+            res.status(400).json({ error: "Invalid user data" });
 
-        await newUser.save();
-        res.status(201).json({ message: "User created successfully" });
+        }
 
     } catch (error) {
         console.log("Error", error.message);
